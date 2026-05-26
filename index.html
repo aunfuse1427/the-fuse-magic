@@ -552,16 +552,18 @@
                     </div>
                 </div>
 
-                <div id="reading-result" class="flex-col items-center text-center mt-4 p-8 bg-background/95 backdrop-blur-xl border border-secondary/20 shadow-[0_0_50px_rgba(233,193,118,0.15)] rounded-2xl pb-12 opacity-0 transition-opacity duration-500 relative z-40 mx-auto w-full" style="display: none;">
-                    <h3 id="result-topic-title" class="font-headline-lg text-2xl text-secondary mb-6 uppercase tracking-wide" style="text-shadow: 0 0 20px rgba(233,193,118,0.4);"></h3>
-                    
-                    <div id="cards-result-container" class="flex flex-col md:flex-row gap-6 justify-center w-full">
-                        </div>
-                    
-                    <button id="reset-btn" class="mt-12 mx-auto btn-ghost px-8 py-3 rounded-full font-label-sm flex items-center gap-2 text-base">
-                        <span class="material-symbols-outlined" style="font-size: 20px;">refresh</span>
-                        <span>เริ่มจับไพ่ใหม่</span>
-                    </button>
+                <div id="reading-result" class="fixed inset-0 z-[100] flex-col items-center justify-start text-center p-4 md:p-8 bg-background/95 backdrop-blur-xl overflow-y-auto opacity-0 transition-opacity duration-500 w-full h-full" style="display: none;">
+                    <div class="w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-full py-12">
+                        <h3 id="result-topic-title" class="font-headline-lg text-3xl md:text-4xl text-secondary mb-8 uppercase tracking-wide" style="text-shadow: 0 0 20px rgba(233,193,118,0.4);"></h3>
+                        
+                        <div id="cards-result-container" class="flex flex-col md:flex-row gap-6 justify-center w-full items-stretch">
+                            </div>
+                        
+                        <button id="reset-btn" class="mt-12 mx-auto btn-ghost px-10 py-4 rounded-full font-label-sm flex items-center gap-2 text-lg bg-surface-container-low shadow-lg hover:shadow-[0_0_20px_rgba(233,193,118,0.4)]">
+                            <span class="material-symbols-outlined" style="font-size: 24px;">refresh</span>
+                            <span>เริ่มจับไพ่ใหม่</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -813,6 +815,71 @@
             }
 
             // --- Initialization & Circular Spread Math ---
+            let draggedCard = null;
+            let dragOffsetX = 0;
+            let dragOffsetY = 0;
+            let cachedSpreadRect = null;
+            let dragAnimationFrame = null;
+
+            document.addEventListener('pointermove', (e) => {
+                if (!draggedCard || !cachedSpreadRect) return;
+                
+                const clientX = e.clientX;
+                const clientY = e.clientY;
+                
+                if (dragAnimationFrame) cancelAnimationFrame(dragAnimationFrame);
+                
+                dragAnimationFrame = requestAnimationFrame(() => {
+                    const tx = clientX - (cachedSpreadRect.left + cachedSpreadRect.width/2) - dragOffsetX;
+                    const ty = clientY - (cachedSpreadRect.top + cachedSpreadRect.height/2) - dragOffsetY;
+                    draggedCard.style.setProperty('--tx', `${tx}px`);
+                    draggedCard.style.setProperty('--ty', `${ty}px`);
+                    draggedCard.style.transform = `translate(${tx}px, ${ty}px) scale(1.1) rotate(0deg)`;
+                });
+            });
+
+            document.addEventListener('pointerup', (e) => {
+                if (!draggedCard) return;
+                
+                const currentSlotIndex = selectedCardsData.length;
+                if (currentSlotIndex >= currentMode) {
+                    draggedCard = null;
+                    return;
+                }
+                
+                const slot = dropZonesContainer.children[currentSlotIndex];
+                const slotRect = slot.getBoundingClientRect();
+                const cardRect = draggedCard.getBoundingClientRect();
+                
+                // ตรวจสอบการทับซ้อนกันระหว่างไพ่ที่ลากและช่องวางไพ่
+                const overlap = !(cardRect.right < slotRect.left || 
+                                  cardRect.left > slotRect.right || 
+                                  cardRect.bottom < slotRect.top || 
+                                  cardRect.top > slotRect.bottom);
+                                  
+                draggedCard.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s, opacity 0.5s';
+                
+                if (overlap) {
+                    handleCardSelect(draggedCard);
+                } else {
+                    // หากไม่ลงช่อง ให้เด้งกลับไปที่เดิม
+                    const targetTx = draggedCard.dataset.targetTx;
+                    const targetTy = draggedCard.dataset.targetTy;
+                    const targetRot = draggedCard.dataset.targetRot;
+                    draggedCard.style.setProperty('--tx', `${targetTx}px`);
+                    draggedCard.style.setProperty('--ty', `${targetTy}px`);
+                    draggedCard.style.transform = `translate(${targetTx}px, ${targetTy}px) rotate(${targetRot}deg)`;
+                    
+                    let tempCard = draggedCard;
+                    setTimeout(() => {
+                        if (!tempCard.classList.contains('is-selected')) {
+                            tempCard.style.animation = `floating 4s ease-in-out infinite`;
+                        }
+                    }, 600);
+                }
+                draggedCard = null;
+            });
+
             function initDeck() {
                 spreadContainer.querySelectorAll('.tarot-card').forEach(c => c.remove());
                 allCards.length = 0;
@@ -877,8 +944,22 @@
                         </div>
                     `;
 
-                    card.addEventListener('click', function() {
-                        handleCardSelect(this);
+                    card.style.touchAction = 'none'; // ป้องกันหน้าจอเลื่อนเวลาลากไพ่บนมือถือ
+                    
+                    card.addEventListener('pointerdown', function(e) {
+                        if (this.classList.contains('is-selected') || !isDeckSpread) return;
+                        draggedCard = this;
+                        const rect = this.getBoundingClientRect();
+                        cachedSpreadRect = spreadContainer.getBoundingClientRect();
+                        dragOffsetX = e.clientX - rect.left - rect.width/2;
+                        dragOffsetY = e.clientY - rect.top - rect.height/2;
+                        this.style.transition = 'none';
+                        this.style.zIndex = 200;
+                        this.style.animation = 'none';
+                        
+                        if (e.pointerId) {
+                            try { this.setPointerCapture(e.pointerId); } catch(err) {}
+                        }
                     });
 
                     spreadContainer.appendChild(card);
@@ -973,20 +1054,19 @@
                     // สร้าง Block คำทำนายตามจำนวนไพ่
                     selectedCardsData.forEach((data, idx) => {
                         const box = document.createElement('div');
-                        box.className = "flex-1 flex flex-col items-center bg-surface-container/40 p-6 rounded-2xl border border-white/10 shadow-lg";
+                        box.className = "flex-1 flex flex-col items-center bg-surface-container/40 p-4 md:p-6 rounded-2xl border border-white/10 shadow-lg";
                         box.innerHTML = `
                             <div class="font-label-sm text-secondary mb-4 bg-secondary/10 px-4 py-1 rounded-full border border-secondary/20 shadow-[0_0_10px_rgba(233,193,118,0.2)]">${labels[idx]}</div>
-                            <img src="${data.image}" class="w-32 h-auto rounded-lg shadow-2xl mb-6 border border-white/5">
-                            <h4 class="font-headline-lg text-xl text-white mb-2 uppercase">${data.name}</h4>
-                            <p class="font-label-sm text-tertiary mb-4 text-xs leading-tight text-center max-w-[200px]">[ ${data.meaning_upright} ]</p>
+                            <img src="${data.image}" class="w-24 md:w-32 h-auto rounded-lg shadow-2xl mb-4 md:mb-6 border border-white/5">
+                            <h4 class="font-headline-lg text-lg md:text-xl text-white mb-2 uppercase">${data.name}</h4>
+                            <p class="font-label-sm text-tertiary mb-4 text-[10px] md:text-xs leading-tight text-center max-w-[200px]">[ ${data.meaning_upright} ]</p>
                             <div class="h-px w-16 bg-white/10 mb-4"></div>
-                            <p class="font-body-md text-on-surface-variant text-sm leading-relaxed text-left w-full">${data.description}</p>
+                            <p class="font-body-md text-on-surface-variant text-xs md:text-sm leading-relaxed text-left w-full">${data.description}</p>
                         `;
                         cardsResultContainer.appendChild(box);
                     });
                     
                     readingResultPanel.style.display = 'flex';
-                    readingResultPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
                     setTimeout(() => {
                         readingResultPanel.classList.remove('opacity-0');
@@ -1160,13 +1240,64 @@
                         
                         if (isPinching) {
                             cursor.classList.add('pinching');
-                            if (hoveredCard && !cardSelectionCooldown) {
-                                handleCardSelect(hoveredCard);
-                                cardSelectionCooldown = true;
-                                setTimeout(() => { cardSelectionCooldown = false; }, 1000);
+                            
+                            // เริ่มลากไพ่
+                            if (!draggedCard && hoveredCard && !cardSelectionCooldown) {
+                                draggedCard = hoveredCard;
+                                draggedCard.style.transition = 'none';
+                                draggedCard.style.zIndex = 200;
+                                draggedCard.style.animation = 'none';
+                            }
+                            
+                            // อัปเดตตำแหน่งไพ่ตามมือ
+                            if (draggedCard) {
+                                const spreadRect = spreadContainer.getBoundingClientRect();
+                                const tx = screenX - (spreadRect.left + spreadRect.width/2);
+                                const ty = screenY - (spreadRect.top + spreadRect.height/2);
+                                draggedCard.style.setProperty('--tx', `${tx}px`);
+                                draggedCard.style.setProperty('--ty', `${ty}px`);
+                                draggedCard.style.transform = `translate(${tx}px, ${ty}px) scale(1.1) rotate(0deg)`;
                             }
                         } else {
                             cursor.classList.remove('pinching');
+                            
+                            // ปล่อยไพ่เช็คว่าลงช่องหรือไม่
+                            if (draggedCard) {
+                                const currentSlotIndex = selectedCardsData.length;
+                                if (currentSlotIndex < currentMode) {
+                                    const slot = dropZonesContainer.children[currentSlotIndex];
+                                    const slotRect = slot.getBoundingClientRect();
+                                    const cardRect = draggedCard.getBoundingClientRect();
+                                    
+                                    const overlap = !(cardRect.right < slotRect.left || 
+                                                      cardRect.left > slotRect.right || 
+                                                      cardRect.bottom < slotRect.top || 
+                                                      cardRect.top > slotRect.bottom);
+                                                      
+                                    draggedCard.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s, opacity 0.5s';
+                                    
+                                    if (overlap) {
+                                        handleCardSelect(draggedCard);
+                                    } else {
+                                        const targetTx = draggedCard.dataset.targetTx;
+                                        const targetTy = draggedCard.dataset.targetTy;
+                                        const targetRot = draggedCard.dataset.targetRot;
+                                        draggedCard.style.setProperty('--tx', `${targetTx}px`);
+                                        draggedCard.style.setProperty('--ty', `${targetTy}px`);
+                                        draggedCard.style.transform = `translate(${targetTx}px, ${targetTy}px) rotate(${targetRot}deg)`;
+                                        
+                                        let tempCard = draggedCard;
+                                        setTimeout(() => {
+                                            if (!tempCard.classList.contains('is-selected')) {
+                                                tempCard.style.animation = `floating 4s ease-in-out infinite`;
+                                            }
+                                        }, 600);
+                                    }
+                                }
+                                draggedCard = null;
+                                cardSelectionCooldown = true;
+                                setTimeout(() => { cardSelectionCooldown = false; }, 500);
+                            }
                         }
                     }
                 } else {
