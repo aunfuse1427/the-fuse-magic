@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html class="dark" lang="th">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Aetheris - นิมิตแห่งไพ่ทาโรต์ดิจิทัล</title>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400&amp;family=JetBrains+Mono:wght@500&amp;family=Playfair+Display:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind Config from Design System -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#bbc5eb",
+                        "primary-container": "#1a1a2e",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#1a1c1c",
+                        "surface-container": "#1e2020",
+                        "on-tertiary-fixed": "#0f1a37",
+                        "on-background": "#e2e2e2",
+                        "inverse-surface": "#e2e2e2",
+                        "on-secondary": "#412d00",
+                        "outline-variant": "#47464c",
+                        "on-secondary-fixed": "#261900",
+                        "surface-dim": "#121414",
+                        "background": "#121414",
+                        "tertiary-container": "#0f1b38",
+                        "secondary-fixed-dim": "#e9c176",
+                        "secondary": "#e9c176",
+                        "on-secondary-fixed-variant": "#5d4201",
+                        "error": "#ffb4ab",
+                        "on-surface": "#e2e2e2",
+                        "on-primary-fixed-variant": "#45455b",
+                        "outline": "#929097",
+                        "primary-fixed-dim": "#c6c4df",
+                        "on-surface-variant": "#c8c5cd",
+                        "surface-container-highest": "#333535",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#dae1ff",
+                        "surface-bright": "#38393a",
+                        "on-primary": "#2f2e43",
+                        "primary": "#c6c4df",
+                        "inverse-on-surface": "#2f3131",
+                        "on-primary-fixed": "#1a1a2e",
+                        "on-tertiary": "#252f4d",
+                        "secondary-fixed": "#ffdea5",
+                        "tertiary-fixed-dim": "#bbc5eb",
+                        "surface": "#121414",
+                        "inverse-primary": "#5d5c74",
+                        "surface-container-high": "#282a2b",
+                        "on-primary-container": "#83829b",
+                        "surface-container-lowest": "#0d0e0f",
+                        "surface-variant": "#333535",
+                        "surface-tint": "#c6c4df",
+                        "primary-fixed": "#e2e0fc",
+                        "on-secondary-container": "#dab36a",
+                        "secondary-container": "#604403",
+                        "on-tertiary-container": "#7983a6",
+                        "on-tertiary-fixed-variant": "#3b4665"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "24px",
+                        "unit": "8px",
+                        "glass-padding": "1.5rem",
+                        "split-gap": "2px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Playfair Display"],
+                        "quote-it": ["Playfair Display"],
+                        "body-md": ["Geist"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "display-lg": ["Playfair Display"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "quote-it": ["20px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.08em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS for Glows and Animations -->
+    <style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .glass-pane {
+            background-color: rgba(26, 26, 46, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(233, 193, 118, 0.15) 0%, rgba(18, 20, 20, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .btn-ghost {
+            border: 1px solid theme('colors.secondary');
+            color: theme('colors.secondary');
+            transition: all 0.3s ease;
+        }
+
+        .btn-ghost:hover {
+            box-shadow: 0 0 15px rgba(233, 193, 118, 0.3);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Video / Canvas stacking */
+        .ritual-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #input_video {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror */
+            opacity: 0.3; /* Blend into background */
+            filter: grayscale(100%) contrast(1.2);
+        }
+
+        #output_canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror */
+            z-index: 10;
+        }
+
+        /* Geometric Overlay for Ritual Space */
+        .geometric-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            border: 1px solid rgba(233, 193, 118, 0.2);
+            pointer-events: none;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+        }
+        
+        .geometric-overlay::before, .geometric-overlay::after {
+            content: '';
+            position: absolute;
+            background: rgba(233, 193, 118, 0.2);
+        }
+        
+        .geometric-overlay::before {
+            top: 50%; left: 0; right: 0; height: 1px;
+        }
+        
+        .geometric-overlay::after {
+            left: 50%; top: 0; bottom: 0; width: 1px;
+        }
+
+        /* Split Gap */
+        .split-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        @media (min-width: 768px) {
+            .split-layout {
+                flex-direction: row;
+            }
+            .ritual-space {
+                flex: 1;
+                border-right: theme('spacing.split-gap') solid theme('colors.surface-bright');
+            }
+            .interpretation-space {
+                flex: 1;
+            }
+        }
+
+        /* Tarot Spread CSS */
+        .spread-container {
+            position: relative;
+            width: 100%;
+            height: 400px; /* Adjust as needed */
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: visible;
+        }
+
+        .tarot-card {
+            position: absolute;
+            width: 140px;
+            height: 220px;
+            bottom: 0;
+            transform-origin: bottom center;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s;
+            cursor: pointer;
+            perspective: 1000px; /* For 3D flip */
+        }
+
+        .tarot-card:hover:not(.is-flipped):not(.is-selected),
+        .tarot-card.is-hovered:not(.is-flipped):not(.is-selected) {
+            transform: translateY(-20px) scale(1.05) !important;
+            z-index: 30 !important;
+            box-shadow: 0 10px 30px rgba(233, 193, 118, 0.3);
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .tarot-card.is-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .tarot-card.is-flipped:not(.is-selected) {
+            z-index: 40 !important;
+            transform: translateY(-40px) scale(1.2) !important;
+        }
+
+        .tarot-card.is-selected {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.8) rotate(0deg) !important;
+            z-index: 100 !important;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            bottom: auto;
+        }
+
+        @media (min-width: 768px) {
+            .tarot-card.is-selected {
+                left: 75%; /* Center of the right pane */
+            }
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            border-radius: theme('borderRadius.lg');
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-back {
+            background-color: theme('colors.primary-container');
+            border: 1px solid theme('colors.outline-variant');
+            /* Mystical pattern */
+            background-image: 
+                radial-gradient(circle at center, rgba(233, 193, 118, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at center, rgba(233, 193, 118, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px, 10px 10px;
+        }
+        
+        .card-back::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 1px solid rgba(233, 193, 118, 0.3);
+            border-radius: 4px;
+        }
+
+        .card-front {
+            background-color: theme('colors.surface-container-high');
+            border: 1px solid theme('colors.secondary');
+            transform: rotateY(180deg);
+            padding: 12px;
+        }
+        
+        .card-front::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid rgba(233, 193, 118, 0.5);
+            border-radius: 2px;
+        }
+
+        #hand-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(233, 193, 118, 0.8);
+            box-shadow: 0 0 15px rgba(233, 193, 118, 0.5);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            display: none;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        
+        #hand-cursor.pinching {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+    </style>
+    <!-- MediaPipe Libraries -->
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased selection:bg-secondary/30 selection:text-secondary">
+    <div id="hand-cursor"></div>
+    <!-- Ambient Background Elements -->
+    <div class="ambient-glow" style="top: 20%; left: 20%;"></div>
+    <div class="ambient-glow" style="bottom: 10%; right: 30%;"></div>
+    
+    <!-- Top Navigation (Mobile) -->
+    <header class="md:hidden glass-pane fixed top-0 w-full z-50 flex justify-between items-center h-16 px-container-padding border-b border-white/10 shadow-none">
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-secondary tracking-widest">AETHERIS</h1>
+        <div class="flex gap-4">
+            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 0;">help</span>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="split-layout pt-16 md:pt-0 w-full h-full relative z-10">
+        <!-- Sidebar Navigation (Desktop) -->
+        <nav class="hidden md:flex flex-col py-8 gap-4 fixed left-0 h-full w-64 z-40 bg-surface-container-lowest/60 backdrop-blur-2xl border-r border-white/5 shadow-2xl">
+            <div class="px-container-padding mb-8">
+                <h1 class="font-headline-lg text-headline-lg font-bold text-secondary tracking-widest mb-2">AETHERIS</h1>
+                <p class="font-label-sm text-label-sm text-tertiary">The Seer</p>
+            </div>
+            <div class="flex-1 flex flex-col gap-2">
+                <a class="bg-secondary-container text-on-secondary-container rounded-xl mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">videocam</span>
+                    <span class="font-label-sm text-label-sm">พิธีกรรมสด (Live Reading)</span>
+                </a>
+                <a class="text-on-surface-variant hover:text-secondary hover:bg-white/10 rounded-xl mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">auto_stories</span>
+                    <span class="font-label-sm text-label-sm">ประวัติ (History)</span>
+                </a>
+                <a class="text-on-surface-variant hover:text-secondary hover:bg-white/10 rounded-xl mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+                    <span class="font-label-sm text-label-sm">คู่มือ (Arcana Guide)</span>
+                </a>
+            </div>
+            <div class="px-container-padding mt-auto">
+                <button class="btn-ghost w-full py-3 rounded-lg font-headline-lg text-body-md flex justify-center items-center gap-2">
+                    <span>เริ่มพิธีกรรมใหม่</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Spacer for Desktop Sidebar -->
+        <div class="hidden md:block w-64 flex-shrink-0"></div>
+
+        <!-- Left Zone: Ritual Space (Webcam) -->
+        <section class="ritual-space relative h-[512px] md:h-full bg-surface-dim">
+            <!-- HUD Elements -->
+            <div class="absolute top-4 left-4 z-20 flex flex-col gap-1">
+                <span class="font-label-sm text-label-sm text-tertiary bg-surface-container-low/80 px-2 py-1 rounded border border-white/10 inline-block w-max backdrop-blur-md" id="tracking-status">
+                    INITIALIZING SENSORS...
+                </span>
+                <span class="hidden font-label-sm text-label-sm text-error bg-error-container/80 px-2 py-1 rounded border border-error/20 inline-block w-max backdrop-blur-md mt-1" id="error-message"></span>
+            </div>
+            <div class="absolute bottom-4 right-4 z-20">
+                <span class="font-label-sm text-label-sm text-tertiary opacity-50">
+                    AETHERIS VISION v1.2.0
+                </span>
+            </div>
+            <!-- Video / Canvas -->
+            <div class="ritual-container">
+                <div class="geometric-overlay"></div>
+                <video autoplay="" id="input_video" playsinline=""></video>
+                <canvas id="output_canvas"></canvas>
+            </div>
+        </section>
+
+        <!-- Right Zone: Interpretation Space (Cards) -->
+        <section class="interpretation-space relative h-[512px] md:h-full overflow-y-auto bg-surface-container-lowest/80 p-container-padding scrollbar-hide">
+            <div class="max-w-2xl mx-auto flex flex-col gap-8 h-full">
+                <!-- Instruction Header -->
+                <header class="text-center mt-4">
+                    <h2 class="font-headline-lg md:font-display-lg text-headline-lg md:text-display-lg text-secondary mb-2">เปิดรับคำทำนาย</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-8">
+                        วางมือขวาของคุณเหนือพื้นที่ศักดิ์สิทธิ์ (กล้อง) เพื่อเชื่อมต่อพลังงาน
+                    </p>
+                </header>
+                <!-- Deck Area -->
+                <div class="flex-1 flex flex-col items-center justify-center relative w-full mt-12 mb-12">
+                    <div class="spread-container" id="tarot-spread">
+                        <!-- Cards will be injected here via JS -->
+                    </div>
+                </div>
+
+                <div id="reading-result" class="flex-col items-center text-center mt-8 pb-12 opacity-0 transition-opacity duration-500" style="display: none;">
+                    <h3 id="result-card-name" class="font-headline-lg text-[28px] text-secondary mb-2 uppercase tracking-wide"></h3>
+                    <div class="h-px w-24 bg-gradient-to-r from-transparent via-secondary to-transparent mb-4"></div>
+                    <p id="result-keywords" class="font-label-sm text-tertiary mb-6 max-w-lg"></p>
+                    <p id="result-description" class="font-body-md text-on-surface-variant leading-relaxed max-w-xl text-left bg-surface-container/50 p-6 rounded-xl border border-white/5"></p>
+                    
+                    <button id="reset-btn" class="mt-8 btn-ghost px-6 py-2 rounded-lg font-label-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">refresh</span>
+                        <span>เริ่มจับไพ่ใหม่</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer (Mobile) -->
+    <footer class="md:hidden fixed bottom-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center px-container-padding py-2 h-10">
+        <span class="font-label-sm text-label-sm text-tertiary-fixed-dim">
+            © 2024 Aetheris
+        </span>
+        <span class="font-label-sm text-label-sm text-tertiary-fixed-dim">
+            Tracking Active
+        </span>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // Tarot Card Data
+        const tarotDeck = [
+            {
+                "id": "the_fool",
+                "number": 0,
+                "name": "The Fool",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg",
+                "meaning_upright": "การเริ่มต้นใหม่, ความอิสระ, การผจญภัย, ความเสี่ยงที่น่าตื่นเต้น",
+                "description": "ก้าวแรกแห่งการเดินทางที่เต็มไปด้วยความหวังและความไร้เดียงสา บ่งบอกถึงการกล้ากระโดดออกจากกรอบเดิมๆ เพื่อเผชิญหน้ากับประสบการณ์ใหม่โดยไม่หวั่นเกรงต่ออนาคต"
+            },
+            {
+                "id": "the_magician",
+                "number": 1,
+                "name": "The Magician",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg",
+                "meaning_upright": "พลังสร้างสรรค์, ความมั่นใจ, การลงมือทำ, ศักยภาพที่ซ่อนอยู่",
+                "description": "คุณมีทรัพยากรและความสามารถทุกอย่างพร้อมอยู่ในมือแล้ว นี่คือช่วงเวลาที่ดีที่สุดในการแปรเปลี่ยนจินตนาการและความคิดให้กลายเป็นความจริงผ่านการลงมือทำ"
+            },
+            {
+                "id": "the_high_priestess",
+                "number": 2,
+                "name": "The High Priestess",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg",
+                "meaning_upright": "สัญชาตญาณ, ความลึกลับ, จิตใต้สำนึก, ความรู้ที่ซ่อนเร้น",
+                "description": "จงเชื่อมั่นในลางสังหรณ์และเสียงกระซิบจากภายในจิตใจของคุณ ไพ่ใบนี้แนะนำให้คุณหยุดพักจากความวุ่นวายภายนอก แล้วหันกลับมาค้นหาคำตอบที่อยู่ในความสงบ"
+            },
+            {
+                "id": "the_empress",
+                "number": 3,
+                "name": "The Empress",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/d/d2/RWS_Tarot_03_Empress.jpg",
+                "meaning_upright": "ความอุดมสมบูรณ์, การก่อกำเนิด, ธรรมชาติ, ความรักความเมตตา",
+                "description": "ช่วงเวลาแห่งการเจริญงอกงาม ทั้งในเรื่องของความรัก การเงิน หรือโปรเจกต์ใหม่ๆ คุณจะได้รับการดูแลเอาใจใส่ และสัมผัสได้ถึงความอบอุ่นและความสมบูรณ์ในชีวิต"
+            },
+            {
+                "id": "the_emperor",
+                "number": 4,
+                "name": "The Emperor",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/c/c3/RWS_Tarot_04_Emperor.jpg",
+                "meaning_upright": "อำนาจ, โครงสร้าง, ความมั่นคง, ความเป็นผู้นำ",
+                "description": "สถานการณ์นี้ต้องการความมีระเบียบวินัยและการจัดการที่ดี การใช้เหตุผลและกฎเกณฑ์จะช่วยให้คุณควบคุมสถานการณ์และสร้างรากฐานที่แข็งแกร่งให้กับอนาคตได้"
+            },
+            {
+                "id": "the_hierophant",
+                "number": 5,
+                "name": "The Hierophant",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/8/8d/RWS_Tarot_05_Hierophant.jpg",
+                "meaning_upright": "ประเพณี, ความเชื่อ, การศึกษา, การขอคำแนะนำจากผู้ใหญ่",
+                "description": "การเดินตามจารีตประเพณีหรือแนวทางที่มีผู้ปูทางไว้แล้วจะปลอดภัยที่สุด อาจหมายถึงการได้รับการชี้แนะจากครูบาอาจารย์ ผู้เชี่ยวชาญ หรือที่ปรึกษาที่ไว้ใจได้"
+            },
+            {
+                "id": "the_lovers",
+                "number": 6,
+                "name": "The Lovers",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/3/3a/RWS_Tarot_06_Lovers.jpg",
+                "meaning_upright": "ความรัก, ความกลมเกลียว, ทางเลือก, ความสัมพันธ์ที่ลึกซึ้ง",
+                "description": "บ่งบอกถึงความสัมพันธ์ที่เข้ากันได้อย่างสมบูรณ์แบบ หรือในอีกนัยหนึ่งคือการต้องตัดสินใจเลือกทางเดินสำคัญในชีวิตที่ต้องใช้หัวใจและความซื่อสัตย์ต่อตนเองเป็นที่ตั้ง"
+            },
+            {
+                "id": "the_chariot",
+                "number": 7,
+                "name": "The Chariot",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg",
+                "meaning_upright": "ความมุ่งมั่น, ชัยชนะ, การเอาชนะอุปสรรค, การเดินทาง",
+                "description": "คุณกำลังเผชิญกับความท้าทาย แต่ด้วยความมุ่งมั่น แรงใจที่เข้มแข็ง และการโฟกัสไปที่เป้าหมาย จะทำให้คุณสามารถฝ่าฟันอุปสรรคและพุ่งทะยานไปสู่ความสำเร็จได้"
+            },
+            {
+                "id": "strength",
+                "number": 8,
+                "name": "Strength",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg",
+                "meaning_upright": "ความกล้าหาญ, ความอดทน, พลังใจ, การควบคุมอารมณ์",
+                "description": "ชัยชนะที่แท้จริงไม่ได้มาจากการใช้กำลังบังคับ แต่มาจากการใช้ความอ่อนโยน ความเมตตา และความอดทนในการสยบปัญหา จงดึงพลังใจที่เข้มแข็งจากภายในตัวคุณออกมา"
+            },
+            {
+                "id": "the_hermit",
+                "number": 9,
+                "name": "The Hermit",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/4/4d/RWS_Tarot_09_Hermit.jpg",
+                "meaning_upright": "การปลีกวิเวก, การทบทวนตัวเอง, การแสวงหาความจริง, แสงสว่างนำทาง",
+                "description": "นี่คือเวลาที่ควรดึงตัวเองออกจากความวุ่นวาย เพื่อทบทวนเป้าหมายและเส้นทางชีวิตอย่างลึกซึ้ง คำตอบที่คุณตามหาไม่ได้อยู่ข้างนอก แต่อยู่ภายในจิตวิญญาณของคุณเอง"
+            },
+            {
+                "id": "wheel_of_fortune",
+                "number": 10,
+                "name": "Wheel of Fortune",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg",
+                "meaning_upright": "โชคชะตา, จุดเปลี่ยน, วัฏจักรชีวิต, โอกาสที่คาดไม่ถึง",
+                "description": "กงล้อแห่งโชคชะตากำลังหมุน อะไรที่เคยตกต่ำกำลังจะดีขึ้น การเปลี่ยนแปลงกะทันหันกำลังจะเกิดขึ้น จงเตรียมพร้อมรับมือกับโอกาสและจังหวะชีวิตที่กำลังพลิกผัน"
+            },
+            {
+                "id": "justice",
+                "number": 11,
+                "name": "Justice",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/e/e0/RWS_Tarot_11_Justice.jpg",
+                "meaning_upright": "ความยุติธรรม, ความสมดุล, กฎหมาย, เหตุและผล",
+                "description": "การกระทำในอดีตกำลังส่งผลถึงปัจจุบัน ทุกอย่างจะเป็นไปตามความถูกต้องและยุติธรรม หากคุณทำดีมาตลอดก็จะได้รับผลดีตอบแทน ไพ่ใบนี้ยังเตือนให้ตัดสินใจด้วยความเที่ยงธรรม"
+            },
+            {
+                "id": "the_hanged_man",
+                "number": 12,
+                "name": "The Hanged Man",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/2/2b/RWS_Tarot_12_Hanged_Man.jpg",
+                "meaning_upright": "การเสียสละ, การหยุดชะงัก, มุมมองใหม่, การปล่อยวาง",
+                "description": "บางครั้งการยอมถอยหลังหนึ่งก้าว หรือการปล่อยให้อะไรๆ หยุดชะงักไปก่อน ก็เพื่อเปิดโอกาสให้คุณได้เห็นภาพรวมในมุมมองใหม่ การเสียสละบางอย่างในวันนี้จะนำไปสู่ผลลัพธ์ที่ดีกว่าในอนาคต"
+            },
+            {
+                "id": "death",
+                "number": 13,
+                "name": "Death",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/d/d7/RWS_Tarot_13_Death.jpg",
+                "meaning_upright": "การสิ้นสุด, การเปลี่ยนแปลงครั้งใหญ่, การทรานส์ฟอร์ม, การปล่อยอดีต",
+                "description": "อย่าหวาดกลัว นี่ไม่ใช่ไพ่แห่งความตายทางกายภาพ แต่เป็นการปิดฉากสิ่งเก่าๆ ที่ไม่ตอบโจทย์อีกต่อไป เพื่อเคลียร์พื้นที่ให้กับการเริ่มต้นใหม่ที่ดีกว่า เหมือนดักแด้ที่ลอกคราบกลายเป็นผีเสื้อ"
+            },
+            {
+                "id": "temperance",
+                "number": 14,
+                "name": "Temperance",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/f/f8/RWS_Tarot_14_Temperance.jpg",
+                "meaning_upright": "ความสมดุล, การประสาน, ความพอดี, การเยียวยา",
+                "description": "ถึงเวลาแห่งการประนีประนอมและหาสมดุลในชีวิต ไม่ว่าจะเป็นเรื่องงานกับเวลาพักผ่อน หรือความสัมพันธ์ การรู้จักผสมผสานสิ่งที่แตกต่างให้เข้ากันอย่างลงตัวจะนำความสงบสุขมาให้"
+            },
+            {
+                "id": "the_devil",
+                "number": 15,
+                "name": "The Devil",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/5/55/RWS_Tarot_15_Devil.jpg",
+                "meaning_upright": "พันธนาการ, กิเลสตัณหา, การยึดติด, ความหมกมุ่น",
+                "description": "คุณอาจกำลังตกอยู่ในสถานการณ์ที่รู้สึกเหมือนถูกมัดไว้ แต่แท้จริงแล้วโซ่ตรวนเหล่านั้นเกิดจากความกังวล ความกลัว หรือกิเลสของคุณเอง จงตระหนักรู้และปลดแอกตัวเองออกมา"
+            },
+            {
+                "id": "the_tower",
+                "number": 16,
+                "name": "The Tower",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg",
+                "meaning_upright": "ความพังทลาย, เหตุการณ์ไม่คาดฝัน, การตื่นรู้, การรื้อโครงสร้างเก่า",
+                "description": "ความเปลี่ยนแปลงอย่างฉับพลันที่ไม่อาจหลีกเลี่ยง สิ่งที่สร้างขึ้นบนรากฐานที่เปราะบางกำลังจะพังลงมา แม้จะเจ็บปวดแต่นี่คือการชำระล้างเพื่อสร้างรากฐานใหม่ที่แท้จริงและมั่นคงกว่าเดิม"
+            },
+            {
+                "id": "the_star",
+                "number": 17,
+                "name": "The Star",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_17_Star.jpg",
+                "meaning_upright": "ความหวัง, แรงบันดาลใจ, ความสงบ, การฟื้นฟู",
+                "description": "หลังจากผ่านพ้นพายุร้าย นี่คือแสงสว่างแห่งความหวัง คุณกำลังเข้าสู่ช่วงเวลาแห่งการเยียวยาจิตใจ ความคิดสร้างสรรค์จะพรั่งพรู และจักรวาลพร้อมจะสนับสนุนความฝันของคุณ"
+            },
+            {
+                "id": "the_moon",
+                "number": 18,
+                "name": "The Moon",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/7/7f/RWS_Tarot_18_Moon.jpg",
+                "meaning_upright": "ความภาพลวงตา, ความกลัว, ความสับสน, จินตนาการล้ำลึก",
+                "description": "สถานการณ์ในตอนนี้อาจไม่เป็นอย่างที่ตาเห็น มีความคลุมเครือและความกังวลซ่อนอยู่ จงระวังการหลอกลวง และใช้สัญชาตญาณในการนำทางผ่านความมืดมิดนี้ไปให้ได้"
+            },
+            {
+                "id": "the_sun",
+                "number": 19,
+                "name": "The Sun",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/1/17/RWS_Tarot_19_Sun.jpg",
+                "meaning_upright": "ความสุข, ความสำเร็จ, ความมีชีวิตชีวา, การมองโลกในแง่ดี",
+                "description": "ไพ่ที่สว่างไสวที่สุดในสำรับ บ่งบอกถึงความสำเร็จ ความสุขสมหวัง และพลังงานบวกที่เต็มเปี่ยม ไม่ว่าคุณกำลังทำอะไรอยู่ ผลลัพธ์จะออกมาดีเยี่ยมและนำความรื่นเริงมาสู่ชีวิต"
+            },
+            {
+                "id": "judgement",
+                "number": 20,
+                "name": "Judgement",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/d/dd/RWS_Tarot_20_Judgment.jpg",
+                "meaning_upright": "การตื่นรู้, การเกิดใหม่, การประเมินผล, การปลดปล่อย",
+                "description": "เสียงแตรแห่งการตื่นรู้ดังกังวาน ถึงเวลาประเมินชีวิตที่ผ่านมาเพื่อก้าวข้ามไปสู่อีกระดับของจิตวิญญาณ การให้อภัยตัวเองและผู้อื่นจะช่วยปลดปล่อยคุณสู่อิสรภาพที่แท้จริง"
+            },
+            {
+                "id": "the_world",
+                "number": 21,
+                "name": "The World",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/f/ff/RWS_Tarot_21_World.jpg",
+                "meaning_upright": "ความสมบูรณ์แบบ, ความสำเร็จลุล่วง, การเดินทางจบสิ้น, การบูรณาการ",
+                "description": "ความสำเร็จขั้นสูงสุด วัฏจักรหนึ่งได้เดินทางมาถึงจุดสมบูรณ์แล้ว คุณได้เรียนรู้บทเรียนครบถ้วน และพร้อมที่จะเฉลิมฉลองให้กับความสำเร็จ ก่อนจะเริ่มต้นการเดินทางรอบใหม่ในระดับที่สูงขึ้น"
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Tarot Spread Setup ---
+            const spreadContainer = document.getElementById('tarot-spread');
+            const totalCards = 22;
+            const radius = 600; // Adjust for spread curvature
+            const startAngle = -45; // Spread from -45deg to +45deg
+            const endAngle = 45;
+            const angleStep = (endAngle - startAngle) / (totalCards - 1);
+            
+            const allCards = [];
+
+            for (let i = 0; i < totalCards; i++) {
+                const angle = startAngle + (i * angleStep);
+                // Convert angle to radians for translation
+                const rad = angle * (Math.PI / 180);
+                
+                // Calculate position to create an arc
+                const tx = Math.sin(rad) * (radius * 0.4);
+                const ty = (Math.cos(rad) * radius) - radius;
+
+                const card = document.createElement('div');
+                card.className = 'tarot-card';
+                card.style.transform = `translate(${tx}px, ${-ty}px) rotate(${angle}deg)`;
+                card.style.zIndex = i;
+                
+                // Store base transform to return to it later if needed
+                card.dataset.baseTransform = `translate(${tx}px, ${-ty}px) rotate(${angle}deg)`;
+                card.dataset.index = i;
+
+                const cardData = tarotDeck[i];
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-back">
+                            <span class="material-symbols-outlined text-secondary mb-2" style="font-size: 32px;">filter_vintage</span>
+                        </div>
+                        <div class="card-front" style="padding: 0; overflow: hidden; border-radius: 0.5rem; background-color: #1a1a2e;">
+                            <img src="${cardData.image}" alt="${cardData.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    </div>
+                `;
+
+                // Add flip interaction (fallback for mouse)
+                card.addEventListener('click', function() {
+                    handleCardSelect(this);
+                });
+
+                spreadContainer.appendChild(card);
+                allCards.push(card);
+            }
+
+            // ดึง Element ของส่วนแสดงคำทำนายมาเก็บไว้
+            const readingResultPanel = document.getElementById('reading-result');
+            const resultCardName = document.getElementById('result-card-name');
+            const resultKeywords = document.getElementById('result-keywords');
+            const resultDescription = document.getElementById('result-description');
+            const resetBtn = document.getElementById('reset-btn');
+
+            function handleCardSelect(card) {
+                if (card.classList.contains('is-selected')) return;
+                
+                // ดึงข้อมูลไพ่ตาม index ที่เราเก็บไว้ใน dataset
+                const cardIndex = parseInt(card.dataset.index);
+                const cardData = tarotDeck[cardIndex];
+                
+                // 1. จัดการ Effect ของไพ่
+                allCards.forEach(c => {
+                    c.classList.remove('is-selected', 'is-flipped');
+                    c.style.transform = c.dataset.baseTransform;
+                    // ทำให้ไพ่ใบอื่นจางลงเพื่อให้โฟกัสที่ใบที่เลือก
+                    if(c !== card) c.style.opacity = '0.15'; 
+                });
+                
+                card.style.opacity = '1';
+                card.classList.add('is-selected', 'is-flipped');
+                
+                // ปิดการคลิกไพ่ชั่วคราวระหว่างรออ่านคำทำนาย
+                document.getElementById('tarot-spread').style.pointerEvents = 'none';
+                
+                // 2. แสดงข้อมูลคำทำนาย
+                // รอให้ Animation พลิกไพ่ทำงานไปสักพักก่อนค่อยแสดงข้อความ
+                setTimeout(() => {
+                    // ใส่ข้อมูลไพ่
+                    resultCardName.innerText = cardData.name;
+                    resultKeywords.innerText = `[ ${cardData.meaning_upright} ]`;
+                    resultDescription.innerText = cardData.description;
+                    
+                    // เปลี่ยน display กลับมาเพื่อเตรียมทำ Animation
+                    readingResultPanel.style.display = 'flex';
+                    
+                    // เลื่อนหน้าจอลงมาจุดที่แสดงคำทำนายอัตโนมัติ เพื่อให้ผู้ใช้มองเห็นเนื้อหาและปุ่มเริ่มใหม่
+                    readingResultPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // หน่วงเวลา 50ms เพื่อให้เบราว์เซอร์เรนเดอร์ display: flex ก่อนใส่ opacity (ทำให้ Fade-in ทำงานสมบูรณ์)
+                    setTimeout(() => {
+                        readingResultPanel.classList.remove('opacity-0');
+                        readingResultPanel.classList.add('opacity-100');
+                    }, 50);
+                }, 600); // ดีเลย์ 0.6 วินาที (เท่ากับเวลา transition ของไพ่)
+            }
+
+            // ฟังก์ชันสำหรับปุ่มเริ่มใหม่ (Reset)
+            resetBtn.addEventListener('click', () => {
+                // ซ่อนคำทำนายโดยเปลี่ยน Opacity เป็น 0 ก่อน (Fade-out)
+                readingResultPanel.classList.remove('opacity-100');
+                readingResultPanel.classList.add('opacity-0');
+                
+                setTimeout(() => {
+                    // ปิดการแสดงผลจริงๆ เมื่อแอนิเมชันจางหายจบลง
+                    readingResultPanel.style.display = 'none';
+                    
+                    // รีเซ็ตไพ่ทุกใบกลับที่เดิม
+                    allCards.forEach(c => {
+                        c.classList.remove('is-selected', 'is-flipped');
+                        c.style.transform = c.dataset.baseTransform;
+                        c.style.opacity = '1'; // เอาความจางออก
+                    });
+
+                    // สำคัญ: เปิดการคลิกไพ่คืน เพื่อให้เล่นรอบใหม่ได้
+                    document.getElementById('tarot-spread').style.pointerEvents = 'auto';
+                }, 500);
+            });
+
+
+            // --- MediaPipe Logic ---
+            const videoElement = document.getElementById('input_video');
+            const canvasElement = document.getElementById('output_canvas');
+            const canvasCtx = canvasElement.getContext('2d');
+            const statusLabel = document.getElementById('tracking-status');
+            const errorLabel = document.getElementById('error-message');
+            const cursor = document.getElementById('hand-cursor');
+            
+            let cardSelectionCooldown = false;
+            
+            // Set canvas size to match parent
+            function resizeCanvas() {
+                const container = canvasElement.parentElement;
+                canvasElement.width = container.clientWidth;
+                canvasElement.height = container.clientHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            // Handle Camera Errors
+            function handleCameraError(error) {
+                console.error("Camera access denied or failed:", error);
+                statusLabel.innerText = "SENSOR DISCONNECTED";
+                statusLabel.classList.replace('text-tertiary', 'text-error');
+                
+                errorLabel.innerText = "ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้งานกล้อง";
+                errorLabel.classList.remove('hidden');
+            }
+
+            // MediaPipe Hands Initialization
+            const hands = new Hands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                }
+            });
+
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.7,
+                minTrackingConfidence: 0.7
+            });
+
+            function getDistance(p1, p2) {
+                return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+            }
+
+            // Drawing Logic and Interaction
+            hands.onResults((results) => {
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    statusLabel.innerText = "ENERGY DETECTED";
+                    statusLabel.classList.add('text-secondary');
+                    
+                    cursor.style.display = 'block';
+                    
+                    for (const landmarks of results.multiHandLandmarks) {
+                        
+                        // Draw Connectors with Gold Glow
+                        canvasCtx.shadowBlur = 10;
+                        canvasCtx.shadowColor = '#e9c176';
+                        drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
+                            color: 'rgba(233, 193, 118, 0.4)', 
+                            lineWidth: 2
+                        });
+                        
+                        // Draw Landmarks (Nodes)
+                        canvasCtx.shadowBlur = 15;
+                        drawLandmarks(canvasCtx, landmarks, {
+                            color: '#e9c176', 
+                            fillColor: '#121414',
+                            lineWidth: 1,
+                            radius: 3
+                        });
+                        
+                        // Special glow on fingertips
+                        const fingerTips = [4, 8, 12, 16, 20];
+                        fingerTips.forEach(tip => {
+                            const point = landmarks[tip];
+                            canvasCtx.beginPath();
+                            canvasCtx.arc(point.x * canvasElement.width, point.y * canvasElement.height, 6, 0, 2 * Math.PI);
+                            canvasCtx.fillStyle = 'rgba(233, 193, 118, 0.8)';
+                            canvasCtx.fill();
+                        });
+                        
+                        // Hand Tracking Logic for Tarot Selection
+                        const indexTip = landmarks[8];
+                        const thumbTip = landmarks[4];
+                        
+                        // Map index finger to screen coordinates
+                        // (1 - x) to account for mirrored video if necessary, or just use mapped coords based on typical setup
+                        // Mediapipe coordinates are [0, 1] relative to the input image
+                        const screenX = (1 - indexTip.x) * window.innerWidth;
+                        const screenY = indexTip.y * window.innerHeight;
+                        
+                        cursor.style.left = `${screenX}px`;
+                        cursor.style.top = `${screenY}px`;
+                        
+                        // Check for hover
+                        let hoveredCard = null;
+                        
+                        // Reset all hovers
+                        allCards.forEach(c => c.classList.remove('is-hovered'));
+                        
+                        // Simple bounding box check
+                        // Note: iterating backwards to favor cards drawn on top (higher z-index)
+                        for (let i = allCards.length - 1; i >= 0; i--) {
+                            const card = allCards[i];
+                            if (card.classList.contains('is-selected')) continue;
+                            
+                            const rect = card.getBoundingClientRect();
+                            if (screenX >= rect.left && screenX <= rect.right &&
+                                screenY >= rect.top && screenY <= rect.bottom) {
+                                hoveredCard = card;
+                                card.classList.add('is-hovered');
+                                break; // Only hover the top-most card
+                            }
+                        }
+                        
+                        // Pinch gesture detection
+                        const pinchDistance = getDistance(indexTip, thumbTip);
+                        const isPinching = pinchDistance < 0.05;
+                        
+                        if (isPinching) {
+                            cursor.classList.add('pinching');
+                            if (hoveredCard && !cardSelectionCooldown) {
+                                handleCardSelect(hoveredCard);
+                                cardSelectionCooldown = true;
+                                setTimeout(() => { cardSelectionCooldown = false; }, 1000);
+                            }
+                        } else {
+                            cursor.classList.remove('pinching');
+                        }
+                    }
+                } else {
+                    statusLabel.innerText = "AWAITING PRESENCE...";
+                    statusLabel.classList.remove('text-secondary');
+                    statusLabel.classList.add('text-tertiary');
+                    cursor.style.display = 'none';
+                    allCards.forEach(c => c.classList.remove('is-hovered'));
+                }
+                canvasCtx.restore();
+            });
+
+            // Camera Initialization
+            const camera = new Camera(videoElement, {
+                onFrame: async () => {
+                    await hands.send({image: videoElement});
+                },
+                width: 1280,
+                height: 720
+            });
+
+            camera.start()
+                .then(() => {
+                    statusLabel.innerText = "AWAITING PRESENCE...";
+                })
+                .catch((err) => {
+                    handleCameraError(err);
+                });
+        });
+    </script>
+</body>
+</html>
