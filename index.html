@@ -912,22 +912,37 @@
                 canvasCtx.restore();
             });
 
-            // Camera Initialization
-            const camera = new Camera(videoElement, {
-                onFrame: async () => {
-                    await hands.send({image: videoElement});
-                },
-                width: 1280,
-                height: 720
-            });
+            // Camera Initialization (ใช้ Native WebRTC เพื่อความรวดเร็วและรองรับกล้องทุกรุ่น)
+            let lastVideoTime = -1;
+            async function processVideoFrame() {
+                if (videoElement.currentTime !== lastVideoTime) {
+                    lastVideoTime = videoElement.currentTime;
+                    try {
+                        await hands.send({image: videoElement});
+                    } catch (error) {
+                        console.warn("MediaPipe กำลังเตรียมความพร้อม...");
+                    }
+                }
+                requestAnimationFrame(processVideoFrame);
+            }
 
-            camera.start()
-                .then(() => {
-                    statusLabel.innerText = "AWAITING PRESENCE...";
-                })
-                .catch((err) => {
-                    handleCameraError(err);
-                });
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                // ไม่บังคับ Resolution ให้ระบบเลือกค่าที่ดีที่สุดของกล้องนั้นๆ เอง
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                    .then((stream) => {
+                        videoElement.srcObject = stream;
+                        videoElement.addEventListener('loadeddata', () => {
+                            videoElement.play();
+                            statusLabel.innerText = "AWAITING PRESENCE...";
+                            processVideoFrame(); // เริ่มลูปส่งภาพให้ AI วิเคราะห์
+                        });
+                    })
+                    .catch((err) => {
+                        handleCameraError(err);
+                    });
+            } else {
+                handleCameraError(new Error("อุปกรณ์หรือเบราว์เซอร์ไม่รองรับกล้อง กรุณาใช้ HTTPS หรือ Live Server"));
+            }
         });
     </script>
 </body>
