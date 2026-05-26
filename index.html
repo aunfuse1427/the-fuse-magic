@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Aetheris - นิมิตแห่งไพ่ทาโรต์ดิจิทัล</title>
+    <title>The Fuse MAGICAL - นิมิตแห่งไพ่ทาโรต์ดิจิทัล</title>
     <!-- Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <!-- Google Fonts -->
@@ -102,10 +102,19 @@
     <!-- Custom CSS for Glows and Animations -->
     <style>
         body {
-            background-color: theme('colors.background');
+            /* Epic Animated Galaxy Background */
+            background: linear-gradient(120deg, #050608, #1a1a2e, #0f0c29);
+            background-size: 400% 400%;
+            animation: nebulaFlow 20s ease infinite;
             color: theme('colors.on-background');
             margin: 0;
             overflow: hidden;
+        }
+
+        @keyframes nebulaFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .glass-pane {
@@ -116,11 +125,12 @@
 
         .ambient-glow {
             position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(233, 193, 118, 0.15) 0%, rgba(18, 20, 20, 0) 70%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(233, 193, 118, 0.2) 0%, rgba(18, 20, 20, 0) 70%);
             pointer-events: none;
             z-index: 0;
+            mix-blend-mode: screen;
         }
 
         .btn-ghost {
@@ -130,8 +140,80 @@
         }
 
         .btn-ghost:hover {
-            box-shadow: 0 0 15px rgba(233, 193, 118, 0.3);
-            background-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 20px rgba(233, 193, 118, 0.4);
+            background-color: rgba(233, 193, 118, 0.1);
+        }
+
+        /* Control Panels (Topic & Mode) */
+        .controls-panel {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            z-index: 50;
+            position: relative;
+        }
+        .control-btn {
+            background: rgba(26, 26, 46, 0.6);
+            border: 1px solid rgba(233, 193, 118, 0.3);
+            color: #bbc5eb;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: theme('fontFamily.body-md');
+            font-size: 14px;
+        }
+        .control-btn:hover {
+            background: rgba(233, 193, 118, 0.1);
+        }
+        .control-btn.active {
+            background: rgba(233, 193, 118, 0.2);
+            border-color: #e9c176;
+            color: #e9c176;
+            box-shadow: 0 0 15px rgba(233, 193, 118, 0.4);
+        }
+
+        /* Drop Zones */
+        .drop-zone-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+            pointer-events: none; /* Let clicks pass through if needed */
+        }
+        .drop-slot {
+            width: 120px;
+            height: 190px;
+            border: 2px dashed rgba(233, 193, 118, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(233, 193, 118, 0.6);
+            font-size: 14px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            transition: all 0.4s;
+            backdrop-filter: blur(4px);
+        }
+        @media (min-width: 768px) {
+            .drop-slot { width: 140px; height: 220px; }
+        }
+        .drop-slot.active-slot {
+            border-style: solid;
+            color: rgba(233, 193, 118, 1);
+            box-shadow: 0 0 20px rgba(233, 193, 118, 0.3) inset, 0 0 15px rgba(233, 193, 118, 0.4);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px rgba(233, 193, 118, 0.2) inset, 0 0 10px rgba(233, 193, 118, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(233, 193, 118, 0.5) inset, 0 0 25px rgba(233, 193, 118, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(233, 193, 118, 0.2) inset, 0 0 10px rgba(233, 193, 118, 0.2); }
         }
 
         /* Video / Canvas stacking */
@@ -150,9 +232,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* Mirror */
-            opacity: 0.3; /* Blend into background */
-            filter: grayscale(100%) contrast(1.2);
+            transform: scaleX(-1);
+            opacity: 0.2;
+            filter: grayscale(100%) contrast(1.2) sepia(30%) hue-rotate(180deg);
         }
 
         #output_canvas {
@@ -160,44 +242,21 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* Mirror */
+            transform: scaleX(-1);
             z-index: 10;
         }
 
-        /* Geometric Overlay for Ritual Space */
         .geometric-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80%;
-            height: 80%;
-            border: 1px solid rgba(233, 193, 118, 0.2);
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 50% 50%, transparent 60%, rgba(233, 193, 118, 0.05) 100%);
             pointer-events: none;
             z-index: 5;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-        }
-        
-        .geometric-overlay::before, .geometric-overlay::after {
-            content: '';
-            position: absolute;
-            background: rgba(233, 193, 118, 0.2);
-        }
-        
-        .geometric-overlay::before {
-            top: 50%; left: 0; right: 0; height: 1px;
-        }
-        
-        .geometric-overlay::after {
-            left: 50%; top: 0; bottom: 0; width: 1px;
-        }
-
-        /* Split Gap (Now Full Screen Mystical Room) */
-        body {
-            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050608 100%);
-            background-size: cover;
         }
 
         .split-layout {
@@ -214,7 +273,7 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            opacity: 0.35;
+            opacity: 0.5;
             pointer-events: none;
             mix-blend-mode: screen;
         }
@@ -229,18 +288,16 @@
             background: transparent;
         }
 
-        /* Floating Animation */
         @keyframes floating {
-            0% { transform: translateY(0px) rotate(var(--base-rot, 0deg)); }
-            50% { transform: translateY(-8px) rotate(calc(var(--base-rot, 0deg) + 2deg)); }
-            100% { transform: translateY(0px) rotate(var(--base-rot, 0deg)); }
+            0% { transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(var(--base-rot, 0deg)); }
+            50% { transform: translate(var(--tx, 0px), calc(var(--ty, 0px) - 10px)) rotate(calc(var(--base-rot, 0deg) + 2deg)); box-shadow: 0 15px 25px rgba(233,193,118,0.2); }
+            100% { transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(var(--base-rot, 0deg)); }
         }
 
-        /* Tarot Spread CSS */
         .spread-container {
             position: relative;
             width: 100%;
-            height: 70vh;
+            height: 80vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -252,8 +309,8 @@
             width: 120px;
             height: 190px;
             bottom: auto;
-            transform-origin: bottom center;
-            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s;
+            transform-origin: center center;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s, opacity 0.5s;
             cursor: pointer;
             perspective: 1000px;
         }
@@ -267,9 +324,9 @@
 
         .tarot-card:hover:not(.is-flipped):not(.is-selected),
         .tarot-card.is-hovered:not(.is-flipped):not(.is-selected) {
-            transform: translateY(-20px) scale(1.05) rotate(var(--base-rot, 0deg)) !important;
-            z-index: 30 !important;
-            box-shadow: 0 10px 30px rgba(233, 193, 118, 0.4);
+            transform: translate(var(--tx, 0px), calc(var(--ty, 0px) - 30px)) scale(1.1) rotate(var(--base-rot, 0deg)) !important;
+            z-index: 50 !important;
+            box-shadow: 0 15px 40px rgba(233, 193, 118, 0.6);
             animation: none !important;
         }
 
@@ -278,7 +335,7 @@
             width: 100%;
             height: 100%;
             text-align: center;
-            transition: transform 0.6s;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy flip */
             transform-style: preserve-3d;
         }
 
@@ -286,93 +343,97 @@
             transform: rotateY(180deg);
         }
         
-        .tarot-card.is-flipped:not(.is-selected) {
-            z-index: 40 !important;
-            transform: translateY(-40px) scale(1.2) rotate(var(--base-rot, 0deg)) !important;
-            animation: none !important;
-        }
-
         .tarot-card.is-selected {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1.8) rotate(0deg) !important;
+            /* Remove absolute fixed centering, JS will set drop slot transform */
             z-index: 100 !important;
-            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            bottom: auto;
             animation: none !important;
-        }
-
-        @media (min-width: 768px) {
-            .tarot-card.is-selected {
-                left: 50%;
-            }
+            box-shadow: 0 0 30px rgba(233, 193, 118, 0.5);
+            border-radius: theme('borderRadius.lg');
         }
 
         .card-front, .card-back {
             position: absolute;
             width: 100%;
             height: 100%;
-            -webkit-backface-visibility: hidden; /* Safari */
+            -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             border-radius: theme('borderRadius.lg');
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
+        /* --- New Majestic Card Back --- */
         .card-back {
-            background-color: theme('colors.primary-container');
-            border: 1px solid theme('colors.outline-variant');
-            /* Mystical pattern */
+            background-color: #0f1b38; /* Deep Mystical Blue */
+            border: 1px solid theme('colors.secondary');
             background-image: 
-                radial-gradient(circle at center, rgba(233, 193, 118, 0.1) 2px, transparent 2px),
-                radial-gradient(circle at center, rgba(233, 193, 118, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px, 10px 10px;
+                radial-gradient(circle at 50% 50%, rgba(233, 193, 118, 0.15) 0%, transparent 60%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 4px);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.9);
         }
-        
         .card-back::after {
+            content: '✧';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 56px;
+            color: rgba(233, 193, 118, 0.8);
+            text-shadow: 0 0 20px rgba(233, 193, 118, 1);
+        }
+        .card-back::before {
             content: '';
             position: absolute;
-            inset: 8px;
-            border: 1px solid rgba(233, 193, 118, 0.3);
-            border-radius: 4px;
+            inset: 6px;
+            border: 2px solid rgba(233, 193, 118, 0.4);
+            border-radius: 6px;
+            background: linear-gradient(135deg, transparent 40%, rgba(233, 193, 118, 0.15) 50%, transparent 60%);
+            background-size: 200% 200%;
+            animation: shimmer 3s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
         .card-front {
-            background-color: theme('colors.surface-container-high');
-            border: 1px solid theme('colors.secondary');
+            background-color: #1a1a2e;
+            border: 2px solid theme('colors.secondary');
             transform: rotateY(180deg);
-            padding: 12px;
+            padding: 8px;
         }
         
         .card-front::before {
             content: '';
             position: absolute;
-            inset: 6px;
-            border: 1px solid rgba(233, 193, 118, 0.5);
-            border-radius: 2px;
+            inset: 4px;
+            border: 1px solid rgba(233, 193, 118, 0.4);
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 10;
         }
 
         #hand-cursor {
             position: fixed;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background-color: rgba(233, 193, 118, 0.8);
-            box-shadow: 0 0 15px rgba(233, 193, 118, 0.5);
+            background-color: rgba(233, 193, 118, 0.9);
+            box-shadow: 0 0 20px rgba(233, 193, 118, 0.8), inset 0 0 10px #fff;
             pointer-events: none;
             z-index: 9999;
             transform: translate(-50%, -50%);
             display: none;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: transform 0.1s;
         }
         
         #hand-cursor.pinching {
-            background-color: rgba(255, 255, 255, 0.9);
-            transform: translate(-50%, -50%) scale(0.8);
+            background-color: #fff;
+            transform: translate(-50%, -50%) scale(0.6);
+            box-shadow: 0 0 30px #fff;
         }
     </style>
     <!-- MediaPipe Libraries -->
@@ -389,7 +450,7 @@
     
     <!-- Top Navigation (Mobile) -->
     <header class="md:hidden glass-pane fixed top-0 w-full z-50 flex justify-between items-center h-16 px-container-padding border-b border-white/10 shadow-none">
-        <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-secondary tracking-widest">AETHERIS</h1>
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-secondary tracking-widest">The Fuse MAGICAL</h1>
         <div class="flex gap-4">
             <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 0;">help</span>
         </div>
@@ -398,9 +459,9 @@
     <!-- Main Layout -->
     <main class="split-layout pt-16 md:pt-0 w-full h-full relative z-10">
         <!-- Sidebar Navigation (Desktop) -->
-        <nav class="hidden md:flex flex-col py-8 gap-4 fixed left-0 h-full w-64 z-40 bg-surface-container-lowest/60 backdrop-blur-2xl border-r border-white/5 shadow-2xl">
+        <nav class="hidden flex-col py-8 gap-4 fixed left-0 h-full w-64 z-40 bg-surface-container-lowest/60 backdrop-blur-2xl border-r border-white/5 shadow-2xl">
             <div class="px-container-padding mb-8">
-                <h1 class="font-headline-lg text-headline-lg font-bold text-secondary tracking-widest mb-2">AETHERIS</h1>
+                <h1 class="font-headline-lg text-headline-lg font-bold text-secondary tracking-widest mb-2" style="font-size: 24px;">The Fuse MAGICAL</h1>
                 <p class="font-label-sm text-label-sm text-tertiary">The Seer</p>
             </div>
             <div class="flex-1 flex flex-col gap-2">
@@ -424,8 +485,7 @@
             </div>
         </nav>
 
-        <!-- Spacer for Desktop Sidebar -->
-        <div class="hidden md:block w-64 flex-shrink-0"></div>
+        <div class="hidden w-64 flex-shrink-0"></div>
 
         <!-- Left Zone: Ritual Space (Webcam) -->
         <section class="ritual-space">
@@ -444,27 +504,45 @@
                 <span class="hidden font-label-sm text-label-sm text-error bg-error-container/80 px-2 py-1 rounded border border-error/20 inline-block w-max backdrop-blur-md mt-1" id="error-message"></span>
             </div>
 
-            <div class="w-full max-w-4xl mx-auto flex flex-col gap-4 h-full px-container-padding relative">
+            <div class="w-full max-w-5xl mx-auto flex flex-col gap-4 h-full px-container-padding relative">
                 <header class="text-center mt-4 absolute top-0 left-0 right-0 z-30" id="instruction-header">
-                    <h2 class="font-headline-lg md:font-display-lg text-headline-lg md:text-display-lg text-secondary mb-2" style="text-shadow: 0 0 30px rgba(233,193,118,0.4);">เปิดรับคำทำนาย</h2>
-                    <p class="font-body-md text-body-md text-on-surface-variant mb-8 inline-block bg-background/60 px-6 py-2 rounded-full backdrop-blur-md border border-white/10 shadow-xl">
-                        ปัดมือผ่านกล้องเพื่อกรีดไพ่
-                    </p>
+                    <h2 class="font-headline-lg md:font-display-lg text-headline-lg md:text-display-lg text-secondary mb-4" style="text-shadow: 0 0 30px rgba(233,193,118,0.6);">เปิดรับคำทำนาย</h2>
+                    
+                    <div class="controls-panel flex-wrap">
+                        <button class="control-btn active" data-topic="ภาพรวม">ภาพรวม</button>
+                        <button class="control-btn" data-topic="ความรัก">ความรัก</button>
+                        <button class="control-btn" data-topic="การงาน">การงาน</button>
+                        <button class="control-btn" data-topic="การเงิน">การเงิน</button>
+                        <div class="w-px h-8 bg-white/20 mx-2 hidden md:block"></div>
+                        <button class="control-btn active" data-mode="1">แบบ 1 ใบ</button>
+                        <button class="control-btn" data-mode="3">แบบ 3 ใบ</button>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-2 mb-8 mt-2">
+                        <p id="instruction-text" class="font-body-md text-body-md text-on-surface-variant inline-block bg-background/60 px-6 py-2 rounded-full backdrop-blur-md border border-white/10 shadow-xl">
+                            ปัดมือผ่านกล้องเพื่อกรีดไพ่
+                        </p>
+                        <button id="manual-spread-btn" class="font-label-sm text-label-sm text-tertiary/60 hover:text-secondary transition-colors cursor-pointer bg-transparent border-none mt-1">
+                            ( หรือคลิกที่นี่เพื่อกรีดไพ่ด้วยตัวเอง )
+                        </button>
+                    </div>
                 </header>
 
-                <div class="flex-1 flex flex-col items-center justify-center relative w-full mt-24">
+                <div class="flex-1 flex flex-col items-center justify-center relative w-full mt-32">
                     <div class="spread-container" id="tarot-spread">
-                        </div>
+                        <div class="drop-zone-wrapper" id="drop-zones">
+                            </div>
+                    </div>
                 </div>
 
-                <div id="reading-result" class="flex-col items-center text-center mt-4 p-8 bg-background/95 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl pb-12 opacity-0 transition-opacity duration-500 relative z-40 mx-auto max-w-2xl" style="display: none;">
-                    <h3 id="result-card-name" class="font-headline-lg text-[28px] text-secondary mb-2 uppercase tracking-wide"></h3>
-                    <div class="h-px w-24 bg-gradient-to-r from-transparent via-secondary to-transparent mb-4"></div>
-                    <p id="result-keywords" class="font-label-sm text-tertiary mb-6 max-w-lg"></p>
-                    <p id="result-description" class="font-body-md text-on-surface-variant leading-relaxed max-w-xl text-left bg-surface-container/50 p-6 rounded-xl border border-white/5"></p>
+                <div id="reading-result" class="flex-col items-center text-center mt-4 p-8 bg-background/95 backdrop-blur-xl border border-secondary/20 shadow-[0_0_50px_rgba(233,193,118,0.15)] rounded-2xl pb-12 opacity-0 transition-opacity duration-500 relative z-40 mx-auto w-full" style="display: none;">
+                    <h3 id="result-topic-title" class="font-headline-lg text-2xl text-secondary mb-6 uppercase tracking-wide" style="text-shadow: 0 0 20px rgba(233,193,118,0.4);"></h3>
                     
-                    <button id="reset-btn" class="mt-8 btn-ghost px-6 py-2 rounded-lg font-label-sm flex items-center gap-2">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">refresh</span>
+                    <div id="cards-result-container" class="flex flex-col md:flex-row gap-6 justify-center w-full">
+                        </div>
+                    
+                    <button id="reset-btn" class="mt-12 mx-auto btn-ghost px-8 py-3 rounded-full font-label-sm flex items-center gap-2 text-base">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">refresh</span>
                         <span>เริ่มจับไพ่ใหม่</span>
                     </button>
                 </div>
@@ -475,7 +553,7 @@
     <!-- Footer (Mobile) -->
     <footer class="md:hidden fixed bottom-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center px-container-padding py-2 h-10">
         <span class="font-label-sm text-label-sm text-tertiary-fixed-dim">
-            © 2024 Aetheris
+            © 2024 The Fuse MAGICAL
         </span>
         <span class="font-label-sm text-label-sm text-tertiary-fixed-dim">
             Tracking Active
@@ -666,146 +744,257 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- Tarot Spread Setup ---
-            const spreadContainer = document.getElementById('tarot-spread');
-            const totalCards = 22;
-            const radius = 600; // Adjust for spread curvature
-            const startAngle = -45; // Spread from -45deg to +45deg
-            const endAngle = 45;
-            const angleStep = (endAngle - startAngle) / (totalCards - 1);
-            
+            // --- Global State & Configuration ---
+            let currentTopic = "ภาพรวม";
+            let currentMode = 1;
+            let selectedCardsData = [];
             const allCards = [];
             let isDeckSpread = false;
             let previousHandX = null;
 
-            for (let i = 0; i < totalCards; i++) {
-                const angle = startAngle + (i * angleStep);
-                // Convert angle to radians for translation
-                const rad = angle * (Math.PI / 180);
-                
-                // Calculate position to create an arc
-                const tx = Math.sin(rad) * (radius * 0.4);
-                const ty = (Math.cos(rad) * radius) - radius;
-
-                const card = document.createElement('div');
-                card.className = 'tarot-card';
-                
-                // Start as a pile in the center
-                const initialTx = 0;
-                const initialTy = i * -1.2; // Slight offset for 3D pile effect
-                card.style.transform = `translate(${initialTx}px, ${initialTy}px) rotate(0deg)`;
-                card.style.zIndex = i;
-                
-                // Apply floating animation inline
-                card.style.animation = `floating 4s ease-in-out infinite`;
-                card.style.animationDelay = `${i * 0.05}s`;
-                
-                // Store target transform for spreading later
-                card.dataset.targetTransform = `translate(${tx}px, ${-ty}px) rotate(${angle}deg)`;
-                card.dataset.baseTransform = `translate(${initialTx}px, ${initialTy}px) rotate(0deg)`; // Base is pile
-                card.dataset.index = i;
-
-                const cardData = tarotDeck[i];
-
-                card.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-back">
-                            <span class="material-symbols-outlined text-secondary mb-2" style="font-size: 32px;">filter_vintage</span>
-                        </div>
-                        <div class="card-front" style="padding: 0; overflow: hidden; border-radius: 0.5rem; background-color: #1a1a2e;">
-                            <img src="${cardData.image}" alt="${cardData.name}" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
-                    </div>
-                `;
-
-                // Add flip interaction (fallback for mouse)
-                card.addEventListener('click', function() {
-                    handleCardSelect(this);
-                });
-
-                spreadContainer.appendChild(card);
-                allCards.push(card);
-            }
-
-            // ดึง Element ของส่วนแสดงคำทำนายมาเก็บไว้
+            const spreadContainer = document.getElementById('tarot-spread');
+            const dropZonesContainer = document.getElementById('drop-zones');
+            const instructionText = document.getElementById('instruction-text');
+            const manualSpreadBtn = document.getElementById('manual-spread-btn');
+            
             const readingResultPanel = document.getElementById('reading-result');
-            const resultCardName = document.getElementById('result-card-name');
-            const resultKeywords = document.getElementById('result-keywords');
-            const resultDescription = document.getElementById('result-description');
+            const resultTopicTitle = document.getElementById('result-topic-title');
+            const cardsResultContainer = document.getElementById('cards-result-container');
             const resetBtn = document.getElementById('reset-btn');
 
-            function handleCardSelect(card) {
-                if (card.classList.contains('is-selected')) return;
-                
-                // ดึงข้อมูลไพ่ตาม index ที่เราเก็บไว้ใน dataset
-                const cardIndex = parseInt(card.dataset.index);
-                const cardData = tarotDeck[cardIndex];
-                
-                // 1. จัดการ Effect ของไพ่
-                allCards.forEach(c => {
-                    c.classList.remove('is-selected', 'is-flipped');
-                    c.style.transform = c.dataset.baseTransform;
-                    // ทำให้ไพ่ใบอื่นจางลงเพื่อให้โฟกัสที่ใบที่เลือก
-                    if(c !== card) c.style.opacity = '0.15'; 
+            // --- UI Controls Binding ---
+            document.querySelectorAll('.control-btn[data-topic]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.control-btn[data-topic]').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentTopic = e.target.dataset.topic;
+                    resetReading(); // กรีดไพ่ใหม่ทันที
                 });
+            });
+
+            document.querySelectorAll('.control-btn[data-mode]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.control-btn[data-mode]').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentMode = parseInt(e.target.dataset.mode);
+                    resetReading(); // กรีดไพ่ใหม่ทันที
+                });
+            });
+
+            // --- Render Drop Slots ---
+            function renderDropZones() {
+                dropZonesContainer.innerHTML = '';
+                const labels = currentMode === 1 ? ["วางไพ่ตรงนี้"] : ["อดีต", "ปัจจุบัน", "อนาคต"];
+                for (let i = 0; i < currentMode; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = `drop-slot ${i === 0 ? 'active-slot' : ''}`;
+                    slot.innerText = labels[i];
+                    slot.dataset.slotIndex = i;
+                    dropZonesContainer.appendChild(slot);
+                }
+                dropZonesContainer.style.opacity = '0'; // ซ่อนไว้ก่อนจนกว่าจะกรีดไพ่
+            }
+
+            // --- Initialization & Circular Spread Math ---
+            function initDeck() {
+                spreadContainer.querySelectorAll('.tarot-card').forEach(c => c.remove());
+                allCards.length = 0;
+                
+                const totalCards = 22;
+                // ปรับขนาดวงกลมให้พอดีกับหน้าจอ
+                const radius = window.innerWidth < 768 ? 160 : 320; 
+                const angleStep = 360 / totalCards;
+
+                // สุ่มไพ่ใหม่ทุกครั้งที่จัดกอง
+                const shuffledDeck = [...tarotDeck].sort(() => Math.random() - 0.5);
+
+                for (let i = 0; i < totalCards; i++) {
+                    const angle = i * angleStep;
+                    const rad = angle * (Math.PI / 180);
+                    
+                    // คำนวณพิกัดวงกลมรอบจุดศูนย์กลาง
+                    const tx = Math.sin(rad) * radius;
+                    const ty = -Math.cos(rad) * radius;
+
+                    const card = document.createElement('div');
+                    card.className = 'tarot-card';
+                    
+                    // กองตรงกลางแบบเหลื่อมกันเล็กน้อยในตอนเริ่ม
+                    const initialTx = 0;
+                    const initialTy = i * -1.2; 
+                    
+                    // ใช้ CSS Variables เพื่อให้ลอยขึ้นลงร่วมกับพิกัด X, Y ได้
+                    card.style.setProperty('--tx', `${initialTx}px`);
+                    card.style.setProperty('--ty', `${initialTy}px`);
+                    card.style.setProperty('--base-rot', `0deg`);
+                    card.style.transform = `translate(${initialTx}px, ${initialTy}px) rotate(0deg)`;
+                    card.style.zIndex = i;
+                    
+                    card.style.animation = `floating 4s ease-in-out infinite`;
+                    card.style.animationDelay = `${i * 0.05}s`;
+                    
+                    // บันทึกตำแหน่งเป้าหมายสำหรับการกางเป็นวงกลมโดยแยกตัวแปรชัดเจน
+                    card.dataset.targetTx = tx;
+                    card.dataset.targetTy = ty;
+                    card.dataset.targetRot = angle;
+                    
+                    card.dataset.baseTx = initialTx;
+                    card.dataset.baseTy = initialTy;
+                    card.dataset.baseRot = 0;
+                    
+                    card.dataset.cardId = shuffledDeck[i].id; // ล็อก ID ไว้กับ Element
+                    
+                    const cardData = shuffledDeck[i];
+
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-back"></div>
+                            <div class="card-front">
+                                <img src="${cardData.image}" alt="${cardData.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 2px;">
+                            </div>
+                        </div>
+                    `;
+
+                    card.addEventListener('click', function() {
+                        handleCardSelect(this);
+                    });
+
+                    spreadContainer.appendChild(card);
+                    allCards.push(card);
+                }
+            }
+
+            renderDropZones();
+            initDeck();
+
+            // --- Spreading Action ---
+            window.spreadDeck = function() {
+                if (!isDeckSpread) {
+                    isDeckSpread = true;
+                    dropZonesContainer.style.opacity = '1';
+                    
+                    allCards.forEach((c, i) => {
+                        const targetTx = c.dataset.targetTx;
+                        const targetTy = c.dataset.targetTy;
+                        const targetRot = c.dataset.targetRot;
+                        
+                        // อัปเดตตัวแปรพิกัดเพื่อให้แอนิเมชันนำไปใช้ทำงานร่วมกันได้
+                        c.style.setProperty('--tx', `${targetTx}px`);
+                        c.style.setProperty('--ty', `${targetTy}px`);
+                        c.style.setProperty('--base-rot', `${targetRot}deg`);
+                        c.style.transform = `translate(${targetTx}px, ${targetTy}px) rotate(${targetRot}deg)`;
+                        
+                        c.style.animation = `floating 4s ease-in-out infinite`;
+                        c.style.animationDelay = `${i * 0.05}s`;
+                    });
+                    
+                    instructionText.innerText = `หยิบไพ่ ${currentMode} ใบมาปล่อยในช่องเพื่อทำนายเรื่อง ${currentTopic}`;
+                    manualSpreadBtn.style.display = 'none';
+                }
+            };
+
+            manualSpreadBtn.addEventListener('click', window.spreadDeck);
+
+            // --- Card Selection to Drop Slot Logic ---
+            function handleCardSelect(card) {
+                if (card.classList.contains('is-selected') || selectedCardsData.length >= currentMode || !isDeckSpread) return;
+                
+                // ดึง Data ที่ตรงกับไพ่ที่ถูกคลิก
+                const cardData = tarotDeck.find(d => d.id === card.dataset.cardId);
+                const currentSlotIndex = selectedCardsData.length;
+                const slot = dropZonesContainer.children[currentSlotIndex];
                 
                 card.style.opacity = '1';
                 card.classList.add('is-selected', 'is-flipped');
                 
-                // ปิดการคลิกไพ่ชั่วคราวระหว่างรออ่านคำทำนาย
-                document.getElementById('tarot-spread').style.pointerEvents = 'none';
+                // คำนวณพิกัดให้ไพ่วิ่งไปหา Slot ตรงกลางเป๊ะๆ
+                const slotRect = slot.getBoundingClientRect();
+                const spreadRect = spreadContainer.getBoundingClientRect();
+                const dropTx = (slotRect.left + slotRect.width/2) - (spreadRect.left + spreadRect.width/2);
+                const dropTy = (slotRect.top + slotRect.height/2) - (spreadRect.top + spreadRect.height/2);
+
+                card.style.setProperty('--tx', `${dropTx}px`);
+                card.style.setProperty('--ty', `${dropTy}px`);
+                card.style.setProperty('--base-rot', `0deg`);
+                card.style.transform = `translate(${dropTx}px, ${dropTy}px) scale(1) rotate(0deg)`;
+                card.style.zIndex = 100 + currentSlotIndex;
                 
-                // 2. แสดงข้อมูลคำทำนาย
-                // รอให้ Animation พลิกไพ่ทำงานไปสักพักก่อนค่อยแสดงข้อความ
+                selectedCardsData.push(cardData);
+                
+                // อัปเดตสถานะของ Slot
+                slot.classList.remove('active-slot');
+                slot.innerText = '';
+                
+                if (currentSlotIndex + 1 < currentMode) {
+                    dropZonesContainer.children[currentSlotIndex + 1].classList.add('active-slot');
+                    instructionText.innerText = `เลือกไพ่ใบที่ ${currentSlotIndex + 2}`;
+                }
+
+                // เมื่อเลือกครบตามโหมดที่ตั้งไว้
+                if (selectedCardsData.length === currentMode) {
+                    spreadContainer.style.pointerEvents = 'none'; // ป้องกันการกดเพิ่ม
+                    allCards.forEach(c => {
+                        if (!c.classList.contains('is-selected')) c.style.opacity = '0.1'; // จางไพ่ที่ไม่ได้เลือก
+                    });
+                    showReading();
+                }
+            }
+
+            // --- Display Result ---
+            function showReading() {
                 setTimeout(() => {
-                    // ใส่ข้อมูลไพ่
-                    resultCardName.innerText = cardData.name;
-                    resultKeywords.innerText = `[ ${cardData.meaning_upright} ]`;
-                    resultDescription.innerText = cardData.description;
+                    resultTopicTitle.innerText = `คำทำนาย: ${currentTopic}`;
+                    cardsResultContainer.innerHTML = '';
                     
-                    // เปลี่ยน display กลับมาเพื่อเตรียมทำ Animation
+                    const labels = currentMode === 1 ? ["ภาพรวม"] : ["อดีต", "ปัจจุบัน", "อนาคต"];
+                    
+                    // สร้าง Block คำทำนายตามจำนวนไพ่
+                    selectedCardsData.forEach((data, idx) => {
+                        const box = document.createElement('div');
+                        box.className = "flex-1 flex flex-col items-center bg-surface-container/40 p-6 rounded-2xl border border-white/10 shadow-lg";
+                        box.innerHTML = `
+                            <div class="font-label-sm text-secondary mb-4 bg-secondary/10 px-4 py-1 rounded-full border border-secondary/20 shadow-[0_0_10px_rgba(233,193,118,0.2)]">${labels[idx]}</div>
+                            <img src="${data.image}" class="w-32 h-auto rounded-lg shadow-2xl mb-6 border border-white/5">
+                            <h4 class="font-headline-lg text-xl text-white mb-2 uppercase">${data.name}</h4>
+                            <p class="font-label-sm text-tertiary mb-4 text-xs leading-tight text-center max-w-[200px]">[ ${data.meaning_upright} ]</p>
+                            <div class="h-px w-16 bg-white/10 mb-4"></div>
+                            <p class="font-body-md text-on-surface-variant text-sm leading-relaxed text-left w-full">${data.description}</p>
+                        `;
+                        cardsResultContainer.appendChild(box);
+                    });
+                    
                     readingResultPanel.style.display = 'flex';
-                    
-                    // เลื่อนหน้าจอลงมาจุดที่แสดงคำทำนายอัตโนมัติ เพื่อให้ผู้ใช้มองเห็นเนื้อหาและปุ่มเริ่มใหม่
                     readingResultPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
-                    // หน่วงเวลา 50ms เพื่อให้เบราว์เซอร์เรนเดอร์ display: flex ก่อนใส่ opacity (ทำให้ Fade-in ทำงานสมบูรณ์)
                     setTimeout(() => {
                         readingResultPanel.classList.remove('opacity-0');
                         readingResultPanel.classList.add('opacity-100');
                     }, 50);
-                }, 600); // ดีเลย์ 0.6 วินาที (เท่ากับเวลา transition ของไพ่)
+                }, 800); // ดีเลย์รอให้ไพ่พลิกเสร็จ
             }
 
-            // ฟังก์ชันสำหรับปุ่มเริ่มใหม่ (Reset)
-            resetBtn.addEventListener('click', () => {
-                // ซ่อนคำทำนายโดยเปลี่ยน Opacity เป็น 0 ก่อน (Fade-out)
+            // --- Reset Logic ---
+            function resetReading() {
                 readingResultPanel.classList.remove('opacity-100');
                 readingResultPanel.classList.add('opacity-0');
                 
                 setTimeout(() => {
-                    // ปิดการแสดงผลจริงๆ เมื่อแอนิเมชันจางหายจบลง
                     readingResultPanel.style.display = 'none';
-                    
-                    // รีเซ็ตสถานะกองไพ่
                     isDeckSpread = false;
                     previousHandX = null;
-                    document.querySelector('#instruction-header p').innerText = "ปัดมือผ่านกล้องเพื่อกรีดไพ่";
-
-                    // รีเซ็ตไพ่ทุกใบกลับเป็นกอง
-                    allCards.forEach((c, i) => {
-                        c.classList.remove('is-selected', 'is-flipped');
-                        c.style.setProperty('--base-rot', `0deg`);
-                        c.style.transform = c.dataset.baseTransform;
-                        c.style.animation = `floating 4s ease-in-out infinite`;
-                        c.style.animationDelay = `${i * 0.05}s`;
-                        c.style.opacity = '1'; // เอาความจางออก
-                    });
-
-                    // สำคัญ: เปิดการคลิกไพ่คืน เพื่อให้เล่นรอบใหม่ได้
-                    document.getElementById('tarot-spread').style.pointerEvents = 'auto';
+                    selectedCardsData = [];
+                    
+                    instructionText.innerText = "ปัดมือผ่านกล้องเพื่อกรีดไพ่";
+                    manualSpreadBtn.style.display = 'block';
+                    
+                    renderDropZones();
+                    initDeck(); // วางกองและสุ่มไพ่ใหม่ทั้งหมด
+                    
+                    spreadContainer.style.pointerEvents = 'auto';
                 }, 500);
-            });
+            }
+
+            resetBtn.addEventListener('click', resetReading);
 
 
             // --- MediaPipe Logic ---
@@ -913,17 +1102,7 @@
                             if (previousHandX !== null) {
                                 let distance = Math.abs(screenX - previousHandX);
                                 if (distance > 60) { // Threshold for swiping
-                                    isDeckSpread = true;
-                                    // Animate spreading
-                                    allCards.forEach((c, i) => {
-                                        const angle = startAngle + (i * angleStep);
-                                        c.style.setProperty('--base-rot', `${angle}deg`);
-                                        c.style.transform = c.dataset.targetTransform;
-                                        // Update floating animation base rotation
-                                        c.style.animation = `floating 4s ease-in-out infinite`;
-                                        c.style.animationDelay = `${i * 0.05}s`;
-                                    });
-                                    document.querySelector('#instruction-header p').innerText = "หยิบไพ่โดยการจีบนิ้วเพื่อเลือกไพ่ที่ดึงดูดคุณ";
+                                    window.spreadDeck(); // เรียกใช้ฟังก์ชันหลักแทนการจัดการตรงนี้
                                 }
                             }
                             previousHandX = screenX;
