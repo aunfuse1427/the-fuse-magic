@@ -194,53 +194,83 @@
             left: 50%; top: 0; bottom: 0; width: 1px;
         }
 
-        /* Split Gap */
-        .split-layout {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+        /* Split Gap (Now Full Screen Mystical Room) */
+        body {
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050608 100%);
+            background-size: cover;
         }
 
-        @media (min-width: 768px) {
-            .split-layout {
-                flex-direction: row;
-            }
-            .ritual-space {
-                flex: 1;
-                border-right: theme('spacing.split-gap') solid theme('colors.surface-bright');
-            }
-            .interpretation-space {
-                flex: 1;
-            }
+        .split-layout {
+            display: block;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        .ritual-space {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.35;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+        
+        .interpretation-space {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            background: transparent;
+        }
+
+        /* Floating Animation */
+        @keyframes floating {
+            0% { transform: translateY(0px) rotate(var(--base-rot, 0deg)); }
+            50% { transform: translateY(-8px) rotate(calc(var(--base-rot, 0deg) + 2deg)); }
+            100% { transform: translateY(0px) rotate(var(--base-rot, 0deg)); }
         }
 
         /* Tarot Spread CSS */
         .spread-container {
             position: relative;
             width: 100%;
-            height: 400px; /* Adjust as needed */
+            height: 70vh;
             display: flex;
             justify-content: center;
-            align-items: flex-end;
+            align-items: center;
             overflow: visible;
         }
 
         .tarot-card {
             position: absolute;
-            width: 140px;
-            height: 220px;
-            bottom: 0;
+            width: 120px;
+            height: 190px;
+            bottom: auto;
             transform-origin: bottom center;
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s;
             cursor: pointer;
-            perspective: 1000px; /* For 3D flip */
+            perspective: 1000px;
+        }
+        
+        @media (min-width: 768px) {
+            .tarot-card {
+                width: 140px;
+                height: 220px;
+            }
         }
 
         .tarot-card:hover:not(.is-flipped):not(.is-selected),
         .tarot-card.is-hovered:not(.is-flipped):not(.is-selected) {
-            transform: translateY(-20px) scale(1.05) !important;
+            transform: translateY(-20px) scale(1.05) rotate(var(--base-rot, 0deg)) !important;
             z-index: 30 !important;
-            box-shadow: 0 10px 30px rgba(233, 193, 118, 0.3);
+            box-shadow: 0 10px 30px rgba(233, 193, 118, 0.4);
+            animation: none !important;
         }
 
         .card-inner {
@@ -258,7 +288,8 @@
         
         .tarot-card.is-flipped:not(.is-selected) {
             z-index: 40 !important;
-            transform: translateY(-40px) scale(1.2) !important;
+            transform: translateY(-40px) scale(1.2) rotate(var(--base-rot, 0deg)) !important;
+            animation: none !important;
         }
 
         .tarot-card.is-selected {
@@ -269,11 +300,12 @@
             z-index: 100 !important;
             transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             bottom: auto;
+            animation: none !important;
         }
 
         @media (min-width: 768px) {
             .tarot-card.is-selected {
-                left: 75%; /* Center of the right pane */
+                left: 50%;
             }
         }
 
@@ -396,45 +428,36 @@
         <div class="hidden md:block w-64 flex-shrink-0"></div>
 
         <!-- Left Zone: Ritual Space (Webcam) -->
-        <section class="ritual-space relative h-[512px] md:h-full bg-surface-dim">
-            <!-- HUD Elements -->
-            <div class="absolute top-4 left-4 z-20 flex flex-col gap-1">
-                <span class="font-label-sm text-label-sm text-tertiary bg-surface-container-low/80 px-2 py-1 rounded border border-white/10 inline-block w-max backdrop-blur-md" id="tracking-status">
-                    INITIALIZING SENSORS...
-                </span>
-                <span class="hidden font-label-sm text-label-sm text-error bg-error-container/80 px-2 py-1 rounded border border-error/20 inline-block w-max backdrop-blur-md mt-1" id="error-message"></span>
-            </div>
-            <div class="absolute bottom-4 right-4 z-20">
-                <span class="font-label-sm text-label-sm text-tertiary opacity-50">
-                    AETHERIS VISION v1.2.0
-                </span>
-            </div>
-            <!-- Video / Canvas -->
+        <section class="ritual-space">
             <div class="ritual-container">
-                <div class="geometric-overlay"></div>
+                <div class="geometric-overlay" style="opacity: 0.15;"></div>
                 <video autoplay="" id="input_video" playsinline=""></video>
                 <canvas id="output_canvas"></canvas>
             </div>
         </section>
 
-        <!-- Right Zone: Interpretation Space (Cards) -->
-        <section class="interpretation-space relative h-[512px] md:h-full overflow-y-auto bg-surface-container-lowest/80 p-container-padding scrollbar-hide">
-            <div class="max-w-2xl mx-auto flex flex-col gap-8 h-full">
-                <!-- Instruction Header -->
-                <header class="text-center mt-4">
-                    <h2 class="font-headline-lg md:font-display-lg text-headline-lg md:text-display-lg text-secondary mb-2">เปิดรับคำทำนาย</h2>
-                    <p class="font-body-md text-body-md text-on-surface-variant mb-8">
-                        วางมือขวาของคุณเหนือพื้นที่ศักดิ์สิทธิ์ (กล้อง) เพื่อเชื่อมต่อพลังงาน
+        <section class="interpretation-space relative h-full w-full overflow-y-auto scrollbar-hide flex flex-col items-center justify-start pt-16">
+            <div class="fixed top-4 left-4 z-50 flex flex-col gap-1 hidden md:flex">
+                <span class="font-label-sm text-label-sm text-tertiary bg-surface-container-low/80 px-2 py-1 rounded border border-white/10 inline-block w-max backdrop-blur-md" id="tracking-status">
+                    INITIALIZING SENSORS...
+                </span>
+                <span class="hidden font-label-sm text-label-sm text-error bg-error-container/80 px-2 py-1 rounded border border-error/20 inline-block w-max backdrop-blur-md mt-1" id="error-message"></span>
+            </div>
+
+            <div class="w-full max-w-4xl mx-auto flex flex-col gap-4 h-full px-container-padding relative">
+                <header class="text-center mt-4 absolute top-0 left-0 right-0 z-30" id="instruction-header">
+                    <h2 class="font-headline-lg md:font-display-lg text-headline-lg md:text-display-lg text-secondary mb-2" style="text-shadow: 0 0 30px rgba(233,193,118,0.4);">เปิดรับคำทำนาย</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-8 inline-block bg-background/60 px-6 py-2 rounded-full backdrop-blur-md border border-white/10 shadow-xl">
+                        ปัดมือผ่านกล้องเพื่อกรีดไพ่
                     </p>
                 </header>
-                <!-- Deck Area -->
-                <div class="flex-1 flex flex-col items-center justify-center relative w-full mt-12 mb-12">
+
+                <div class="flex-1 flex flex-col items-center justify-center relative w-full mt-24">
                     <div class="spread-container" id="tarot-spread">
-                        <!-- Cards will be injected here via JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <div id="reading-result" class="flex-col items-center text-center mt-8 pb-12 opacity-0 transition-opacity duration-500" style="display: none;">
+                <div id="reading-result" class="flex-col items-center text-center mt-4 p-8 bg-background/95 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl pb-12 opacity-0 transition-opacity duration-500 relative z-40 mx-auto max-w-2xl" style="display: none;">
                     <h3 id="result-card-name" class="font-headline-lg text-[28px] text-secondary mb-2 uppercase tracking-wide"></h3>
                     <div class="h-px w-24 bg-gradient-to-r from-transparent via-secondary to-transparent mb-4"></div>
                     <p id="result-keywords" class="font-label-sm text-tertiary mb-6 max-w-lg"></p>
@@ -652,6 +675,8 @@
             const angleStep = (endAngle - startAngle) / (totalCards - 1);
             
             const allCards = [];
+            let isDeckSpread = false;
+            let previousHandX = null;
 
             for (let i = 0; i < totalCards; i++) {
                 const angle = startAngle + (i * angleStep);
@@ -664,11 +689,20 @@
 
                 const card = document.createElement('div');
                 card.className = 'tarot-card';
-                card.style.transform = `translate(${tx}px, ${-ty}px) rotate(${angle}deg)`;
+                
+                // Start as a pile in the center
+                const initialTx = 0;
+                const initialTy = i * -1.2; // Slight offset for 3D pile effect
+                card.style.transform = `translate(${initialTx}px, ${initialTy}px) rotate(0deg)`;
                 card.style.zIndex = i;
                 
-                // Store base transform to return to it later if needed
-                card.dataset.baseTransform = `translate(${tx}px, ${-ty}px) rotate(${angle}deg)`;
+                // Apply floating animation inline
+                card.style.animation = `floating 4s ease-in-out infinite`;
+                card.style.animationDelay = `${i * 0.05}s`;
+                
+                // Store target transform for spreading later
+                card.dataset.targetTransform = `translate(${tx}px, ${-ty}px) rotate(${angle}deg)`;
+                card.dataset.baseTransform = `translate(${initialTx}px, ${initialTy}px) rotate(0deg)`; // Base is pile
                 card.dataset.index = i;
 
                 const cardData = tarotDeck[i];
@@ -753,10 +787,18 @@
                     // ปิดการแสดงผลจริงๆ เมื่อแอนิเมชันจางหายจบลง
                     readingResultPanel.style.display = 'none';
                     
-                    // รีเซ็ตไพ่ทุกใบกลับที่เดิม
-                    allCards.forEach(c => {
+                    // รีเซ็ตสถานะกองไพ่
+                    isDeckSpread = false;
+                    previousHandX = null;
+                    document.querySelector('#instruction-header p').innerText = "ปัดมือผ่านกล้องเพื่อกรีดไพ่";
+
+                    // รีเซ็ตไพ่ทุกใบกลับเป็นกอง
+                    allCards.forEach((c, i) => {
                         c.classList.remove('is-selected', 'is-flipped');
+                        c.style.setProperty('--base-rot', `0deg`);
                         c.style.transform = c.dataset.baseTransform;
+                        c.style.animation = `floating 4s ease-in-out infinite`;
+                        c.style.animationDelay = `${i * 0.05}s`;
                         c.style.opacity = '1'; // เอาความจางออก
                     });
 
@@ -865,6 +907,30 @@
                         
                         cursor.style.left = `${screenX}px`;
                         cursor.style.top = `${screenY}px`;
+                        
+                        // --- Swipe Detection for Spreading Deck ---
+                        if (!isDeckSpread) {
+                            if (previousHandX !== null) {
+                                let distance = Math.abs(screenX - previousHandX);
+                                if (distance > 60) { // Threshold for swiping
+                                    isDeckSpread = true;
+                                    // Animate spreading
+                                    allCards.forEach((c, i) => {
+                                        const angle = startAngle + (i * angleStep);
+                                        c.style.setProperty('--base-rot', `${angle}deg`);
+                                        c.style.transform = c.dataset.targetTransform;
+                                        // Update floating animation base rotation
+                                        c.style.animation = `floating 4s ease-in-out infinite`;
+                                        c.style.animationDelay = `${i * 0.05}s`;
+                                    });
+                                    document.querySelector('#instruction-header p').innerText = "หยิบไพ่โดยการจีบนิ้วเพื่อเลือกไพ่ที่ดึงดูดคุณ";
+                                }
+                            }
+                            previousHandX = screenX;
+                            // Reset context and skip hover logic while stacked
+                            canvasCtx.restore();
+                            return; 
+                        }
                         
                         // Check for hover
                         let hoveredCard = null;
