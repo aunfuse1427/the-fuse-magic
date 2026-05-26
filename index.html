@@ -186,15 +186,15 @@
             pointer-events: none; /* Let clicks pass through if needed */
         }
         .drop-slot {
-            width: 120px;
-            height: 190px;
+            width: 80px;
+            height: 125px;
             border: 2px dashed rgba(233, 193, 118, 0.3);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: rgba(233, 193, 118, 0.6);
-            font-size: 14px;
+            font-size: 12px;
             text-align: center;
             background: rgba(0, 0, 0, 0.4);
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
@@ -202,6 +202,9 @@
             backdrop-filter: blur(4px);
         }
         @media (min-width: 768px) {
+            .drop-slot { width: 120px; height: 190px; font-size: 14px; }
+        }
+        @media (min-width: 1024px) {
             .drop-slot { width: 140px; height: 220px; }
         }
         .drop-slot.active-slot {
@@ -306,8 +309,8 @@
 
         .tarot-card {
             position: absolute;
-            width: 120px;
-            height: 190px;
+            width: 80px;
+            height: 125px;
             bottom: auto;
             transform-origin: center center;
             transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s, opacity 0.5s;
@@ -317,12 +320,26 @@
         
         @media (min-width: 768px) {
             .tarot-card {
+                width: 120px;
+                height: 190px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .tarot-card {
                 width: 140px;
                 height: 220px;
             }
         }
 
-        .tarot-card:hover:not(.is-flipped):not(.is-selected),
+        @media (hover: hover) {
+            .tarot-card:hover:not(.is-flipped):not(.is-selected) {
+                transform: translate(var(--tx, 0px), calc(var(--ty, 0px) - 30px)) scale(1.1) rotate(var(--base-rot, 0deg)) !important;
+                z-index: 50 !important;
+                box-shadow: 0 15px 40px rgba(233, 193, 118, 0.6);
+                animation: none !important;
+            }
+        }
+
         .tarot-card.is-hovered:not(.is-flipped):not(.is-selected) {
             transform: translate(var(--tx, 0px), calc(var(--ty, 0px) - 30px)) scale(1.1) rotate(var(--base-rot, 0deg)) !important;
             z-index: 50 !important;
@@ -528,7 +545,7 @@
                     </div>
                 </header>
 
-                <div class="flex-1 flex flex-col items-center justify-center relative w-full mt-32">
+                <div class="flex-1 flex flex-col items-center justify-center relative w-full mt-48 md:mt-32">
                     <div class="spread-container" id="tarot-spread">
                         <div class="drop-zone-wrapper" id="drop-zones">
                             </div>
@@ -802,7 +819,12 @@
                 
                 const totalCards = 22;
                 // ปรับขนาดวงกลมให้พอดีกับหน้าจอ
-                const radius = window.innerWidth < 768 ? 160 : 320; 
+                let radius = 320;
+                if (window.innerWidth < 768) {
+                    radius = 110;
+                } else if (window.innerWidth < 1024) {
+                    radius = 240;
+                }
                 const angleStep = 360 / totalCards;
 
                 // สุ่มไพ่ใหม่ทุกครั้งที่จัดกอง
